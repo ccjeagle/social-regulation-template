@@ -59,6 +59,6 @@ export async function renderTemplates(opts: {
   const files = FILES[opts.audience];
   const [main, pin] = await Promise.all([load(files.main), load(files.pin)]);
   // The version is part of the document so a pasted or downloaded copy can be traced back.
-  const stamped = `${main.text}\n範本版本：${main.version}\n`;
+  const stamped = `${main.text}\n-- 範本版本：${main.version} --\n`;
   return { main: stamped, pin: pin.text, version: main.version, pinVersion: pin.version };
 }
