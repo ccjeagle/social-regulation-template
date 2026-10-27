@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "社群交流規範產生器",
+  title: "社群交流基本規範產生器",
   robots: { index: false, follow: false },
 };
 

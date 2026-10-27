@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { downloadDocx } from "@/lib/docx";
 import { parseMarkdown, toPlainText, type Block, type Run } from "@/lib/markdown";
 
 type Audience = "internal" | "public";
@@ -53,9 +52,11 @@ export function Generator({ accessKey }: { accessKey: string }) {
   return (
     <>
       <header className="mb-10 text-center">
-        <h1 className="font-serif text-3xl tracking-wide text-jade-deep sm:text-4xl">社群交流規範產生器</h1>
+        <h1 className="font-serif text-3xl tracking-wide text-jade-deep sm:text-4xl">社群交流基本規範產生器</h1>
         <p className="mx-auto mt-4 max-w-md text-ink-soft">
-          填入社群名稱，選擇適用對象，即可取得專屬於您社群的交流規範與置頂訊息。
+          填入社群名稱，選擇適用對象，即可取得
+          <br />
+          專屬於您社群的交流基本規範與置頂訊息。
         </p>
       </header>
 
@@ -103,15 +104,10 @@ export function Generator({ accessKey }: { accessKey: string }) {
         <section ref={resultRef} aria-label="產生結果" className="mt-14 scroll-mt-6 space-y-8">
           <Panel
             id="print-area"
-            title="交流規範全文"
+            title="交流基本規範全文"
             subtitle={`版本 ${result.version}`}
             copyText={toPlainText(result.main)}
-            actions={
-              <>
-                <SmallButton onClick={() => downloadDocx(result.main, `${result.name} 交流規範`)}>下載 Word</SmallButton>
-                <SmallButton onClick={() => window.print()}>下載 PDF</SmallButton>
-              </>
-            }
+            actions={<SmallButton onClick={() => window.print()}>產生 PDF</SmallButton>}
           >
             <Preview markdown={result.main} />
           </Panel>
