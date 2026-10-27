@@ -5,10 +5,20 @@ export type Audience = "internal" | "public";
 export type Size = "small" | "large";
 
 const DIR = path.join(process.cwd(), "content", "released");
-const MAIN: Record<Audience, string> = {
-  internal: "天帝教社群交流規範（範本）v3-D 興利導向版",
-  public: "天帝教社群交流規範（範本）v3-E 公開社群興利版",
+const FILES: Record<Audience, { main: string; pin: string }> = {
+  internal: { main: "internal.md", pin: "internal.pin.md" },
+  public: { main: "public.md", pin: "public.pin.md" },
 };
+
+// Leading `---` block with simple `key: value` lines; returns the body and the metadata.
+function splitFrontmatter(raw: string): { meta: Record<string, string>; body: string } {
+  const m = raw.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!m) return { meta: {}, body: raw };
+  const meta = Object.fromEntries(
+    m[1].split("\n").map((l) => l.split(/:\s*/, 2) as [string, string]),
+  );
+  return { meta, body: raw.slice(m[0].length) };
+}
 
 // <!-- if:small --> ... <!-- endif --> keeps the block only when the flag is on.
 function applyBlocks(src: string, flags: Set<string>): string {
@@ -44,13 +54,10 @@ export async function renderTemplates(opts: {
 }) {
   const flags = new Set<string>(opts.audience === "internal" ? [opts.size] : []);
   const load = async (file: string) => {
-    const raw = await readFile(path.join(DIR, file), "utf8");
-    return tidy(applyBlocks(raw, flags).replaceAll("{{社群名稱}}", opts.name));
+    const { meta, body } = splitFrontmatter(await readFile(path.join(DIR, file), "utf8"));
+    return { text: tidy(applyBlocks(body, flags).replaceAll("{{社群名稱}}", opts.name)), version: meta.version ?? "" };
   };
-  const stem = MAIN[opts.audience];
-  const [main, pin] = await Promise.all([
-    load(`${stem}.md`),
-    load(`${stem}．置頂精簡版.md`),
-  ]);
-  return { main, pin, version: opts.audience === "internal" ? "v3-D" : "v3-E" };
+  const files = FILES[opts.audience];
+  const [main, pin] = await Promise.all([load(files.main), load(files.pin)]);
+  return { main: main.text, pin: pin.text, version: main.version };
 }

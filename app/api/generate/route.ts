@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { isValidKey } from "@/lib/access";
 import { logGeneration } from "@/lib/log";
+import { tooMany } from "@/lib/ratelimit";
 import { renderTemplates, type Audience, type Size } from "@/lib/templates";
 
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  if (tooMany(ip)) return bad("操作太頻繁，請稍後再試", 429);
+
   const body = await req.json().catch(() => null);
   if (!body) return bad("格式錯誤");
   if (!isValidKey(body.id)) return bad("網址已失效，請聯絡資訊委員會，取得最新網址。", 403);
