@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --mist: #f2f5f2;
+  --paper: #fbfcfb;
+  --ink: #1f2d2a;
+  --ink-soft: #5b6b66;
+  --jade: #4a7c70;
+  --jade-deep: #355d53;
+  --jade-wash: #dfeae5;
+  --line: #d6e1db;
+  --apricot: #f3d9b8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-mist: var(--mist);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-jade: var(--jade);
+  --color-jade-deep: var(--jade-deep);
+  --color-jade-wash: var(--jade-wash);
+  --color-line: var(--line);
+  --color-apricot: var(--apricot);
+  --font-sans: var(--font-sans-tc), system-ui, sans-serif;
+  --font-serif: var(--font-serif-tc), serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.75;
+}
+
+:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* PDF: only the main content prints */
+@media print {
+  body { background: #fff; }
+  body * { visibility: hidden; }
+  #print-area, #print-area * { visibility: visible; }
+  #print-area { position: absolute; inset: 0; padding: 0; border: 0; box-shadow: none; }
+  @page { margin: 16mm; }
 }
