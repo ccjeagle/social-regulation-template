@@ -42,7 +42,6 @@ function applyBlocks(src: string, flags: Set<string>): string {
 function tidy(src: string): string {
   return src
     .replace(/^<!--.*-->\n*/gm, "") // leading admin notes
-    .replace(/(\n>[ \t]*){2,}(?=\n)/g, "\n>") // collapse empty quote lines left by removed blocks
     .replace(/\n{3,}/g, "\n\n")
     .trim() + "\n";
 }

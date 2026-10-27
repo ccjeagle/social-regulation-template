@@ -1,10 +1,10 @@
 // Minimal parser for the subset of markdown used by the templates:
-// headings, paragraphs, ordered lists, blockquotes, **bold**.
+// headings, paragraphs, ordered lists, bullets, **bold**.
 export type Run = { text: string; bold?: boolean };
 export type Block =
   | { type: "heading"; level: 1 | 2; runs: Run[] }
   | { type: "paragraph"; runs: Run[] }
-  | { type: "quote"; runs: Run[] }
+  | { type: "bullet"; runs: Run[] }
   | { type: "item"; n: number; runs: Run[] };
 
 export function parseInline(s: string): Run[] {
@@ -18,21 +18,14 @@ export function parseInline(s: string): Run[] {
 
 export function parseMarkdown(md: string): Block[] {
   const blocks: Block[] = [];
-  let quote: string[] = [];
-  const flush = () => {
-    if (quote.length) blocks.push({ type: "quote", runs: parseInline(quote.join("\n")) });
-    quote = [];
-  };
   for (const raw of md.split("\n")) {
     const line = raw.trimEnd();
-    if (line.startsWith(">")) {
-      const body = line.replace(/^>\s?/, "");
-      if (body) quote.push(body);
-      else flush();
+    if (!line.trim()) continue;
+    const bullet = line.match(/^[-*]\s+(.*)/);
+    if (bullet) {
+      blocks.push({ type: "bullet", runs: parseInline(bullet[1]) });
       continue;
     }
-    flush();
-    if (!line.trim()) continue;
     const h = line.match(/^(#{1,2})\s+(.*)/);
     if (h) blocks.push({ type: "heading", level: h[1].length as 1 | 2, runs: parseInline(h[2]) });
     else {
@@ -41,7 +34,6 @@ export function parseMarkdown(md: string): Block[] {
       else blocks.push({ type: "paragraph", runs: parseInline(line) });
     }
   }
-  flush();
   return blocks;
 }
 
@@ -55,8 +47,8 @@ export function toPlainText(md: string): string {
       const line =
         b.type === "heading"
           ? b.level === 1 ? text(b.runs) : `【${text(b.runs)}】`
-          : b.type === "item" ? `${b.n}. ${text(b.runs)}` : text(b.runs);
-      const tight = b.type === "item" && blocks[i - 1]?.type === "item";
+          : b.type === "item" ? `${b.n}. ${text(b.runs)}` : b.type === "bullet" ? `• ${text(b.runs)}` : text(b.runs);
+      const tight = (b.type === "item" || b.type === "bullet") && blocks[i - 1]?.type === b.type;
       return (i === 0 ? "" : tight ? "\n" : "\n\n") + line;
     })
     .join("");

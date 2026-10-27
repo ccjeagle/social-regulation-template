@@ -116,9 +116,6 @@ export function Generator({ accessKey }: { accessKey: string }) {
             <Preview markdown={result.pin} />
           </Panel>
 
-          <p className="text-center text-sm text-ink-soft">
-            內容僅在您的瀏覽器中轉成檔案，不會上傳或保存。
-          </p>
         </section>
       )}
     </>
@@ -203,9 +200,18 @@ const Runs = ({ runs }: { runs: Run[] }) => (
 );
 
 function Preview({ markdown }: { markdown: string }) {
+  const blocks = parseMarkdown(markdown);
   return (
     <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 print:max-h-none print:overflow-visible">
-      {parseMarkdown(markdown).map((b, i) => <BlockView key={i} b={b} />)}
+      {blocks.map((b, i) => {
+        const list = (x?: Block) => x?.type === "item" || x?.type === "bullet";
+        // consecutive list entries sit closer together than paragraphs
+        return (
+          <div key={i} className={list(b) && list(blocks[i - 1]) ? "-mt-1.5" : undefined}>
+            <BlockView b={b} />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -218,8 +224,8 @@ function BlockView({ b }: { b: Block }) {
         : <h4 className="pt-3 font-serif text-lg text-jade-deep"><Runs runs={b.runs} /></h4>;
     case "item":
       return <p className="pl-6 -indent-5"><span className="mr-1 text-jade">{b.n}.</span><Runs runs={b.runs} /></p>;
-    case "quote":
-      return <p className="rounded-2xl bg-apricot/25 px-4 py-3 text-ink"><Runs runs={b.runs} /></p>;
+    case "bullet":
+      return <p className="pl-6 -indent-4"><span className="mr-1.5 text-jade">•</span><Runs runs={b.runs} /></p>;
     default:
       return <p><Runs runs={b.runs} /></p>;
   }
