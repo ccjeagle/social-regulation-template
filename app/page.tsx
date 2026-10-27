@@ -7,9 +7,9 @@ async function Gate({ searchParams }: { searchParams: PageProps<"/">["searchPara
   const key = Array.isArray(id) ? id[0] : id;
   if (!isValidKey(key)) {
     return (
-      <p className="mx-auto mt-32 max-w-md px-6 text-center text-lg text-ink-soft">
+      <h1 className="mx-auto mt-32 max-w-md px-6 text-center text-lg font-normal text-ink-soft">
         請聯絡資訊委員會，取得最新網址。
-      </p>
+      </h1>
     );
   }
   return <Generator accessKey={key as string} />;

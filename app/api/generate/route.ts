@@ -23,15 +23,18 @@ export async function POST(req: Request) {
   const size: Size = body.size === "large" ? "large" : "small";
 
   const out = await renderTemplates({ name, audience, size });
+  // The client sets `repeat` when the inputs match the result already on screen; that is not a new generation.
   // Runs after the response is sent, so a slow or failing Sheet never reaches the user.
-  after(() =>
-    logGeneration({
-      name,
-      audience,
-      size: audience === "internal" ? size : "",
-      version: out.version,
-      pinVersion: out.pinVersion,
-    }),
-  );
+  if (body.repeat !== true) {
+    after(() =>
+      logGeneration({
+        name,
+        audience,
+        size: audience === "internal" ? size : "",
+        version: out.version,
+        pinVersion: out.pinVersion,
+      }),
+    );
+  }
   return NextResponse.json(out, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1,32 +1,32 @@
 # 產生紀錄：Google Sheet 設定
 
 每次按下「產生」，後端會在 Google Sheet 新增一列（時間、社群名稱、對象、用途、版本）。
-以下改寫自 expense-line-message-api 的 README。**這個專案請用獨立的 GCP project 與 service account**，不要與其他專案共用。
+以下改寫自 expense-line-message-api 的 README。**這個專案請用獨立的 service account**（不與其他專案共用）；GCP project 使用 tienti.org 的 IT 共用專案 `it-workspace-apps`（顯示名稱「IT Google Workspace」，位於資料夾「IT Commi」）。
 
-## 1. 建立 GCP project 並啟用 Sheets API
+## 1. GCP project 與 Sheets API
+
+使用既有的 project `it-workspace-apps`（IT Google Workspace），不需另建；只要確認已啟用 Sheets API：
 
 ```bash
-gcloud projects create social-regulation-log --name="Social Regulation Log"
-gcloud config set project social-regulation-log
-gcloud services enable sheets.googleapis.com
+gcloud services enable sheets.googleapis.com --project=it-workspace-apps
 ```
-
-（project ID 全球唯一，被占用時換一個名字，下列指令的 `YOUR_PROJECT_ID` 同步更換。）
 
 ## 2. 建立 service account 與金鑰
 
 ```bash
-gcloud iam service-accounts create sheets-writer --display-name="Sheets Writer"
+gcloud iam service-accounts create social-reg-sheets-writer \
+  --display-name="Social Regulation Sheets Writer" \
+  --project=it-workspace-apps
 
 gcloud iam service-accounts keys create sheets-key.json \
-  --iam-account=sheets-writer@YOUR_PROJECT_ID.iam.gserviceaccount.com
+  --iam-account=social-reg-sheets-writer@it-workspace-apps.iam.gserviceaccount.com
 ```
 
-`sheets-key.json` 內有兩個要用的值：
+`sheets-key.json` 內有兩個要用的值（service account 不需授予任何 IAM 角色，只靠 Sheet 的共用權限寫入）：
 
 ```json
 {
-  "client_email": "sheets-writer@xxx.iam.gserviceaccount.com",  // → GOOGLE_SERVICE_ACCOUNT_EMAIL
+  "client_email": "social-reg-sheets-writer@it-workspace-apps.iam.gserviceaccount.com",  // → GOOGLE_SERVICE_ACCOUNT_EMAIL
   "private_key": "-----BEGIN PRIVATE KEY-----\n...",            // → GOOGLE_PRIVATE_KEY
   ...
 }
