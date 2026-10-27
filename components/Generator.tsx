@@ -193,7 +193,7 @@ function Choice<T extends string>({
         {options.map((o) => (
           <label
             key={o.value}
-            className="cursor-pointer rounded-2xl border border-line bg-white p-4 transition has-[:checked]:border-jade has-[:checked]:bg-jade-wash/70 has-[:checked]:ring-1 has-[:checked]:ring-jade has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-jade/25"
+            className="cursor-pointer rounded-2xl border border-line bg-white p-4 transition has-checked:border-jade has-checked:bg-jade-wash/70 has-checked:ring-1 has-checked:ring-jade has-focus-visible:ring-4 has-focus-visible:ring-jade/25"
           >
             <input type="radio" name={name} value={o.value} checked={value === o.value} onChange={() => onChange(o.value)} className="sr-only" />
             <span className="block font-medium">{o.label}</span>
