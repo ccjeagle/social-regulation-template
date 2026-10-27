@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { isValidKey } from "@/lib/access";
 import { logGeneration } from "@/lib/log";
 import { tooMany } from "@/lib/ratelimit";
@@ -23,6 +23,15 @@ export async function POST(req: Request) {
   const size: Size = body.size === "large" ? "large" : "small";
 
   const out = await renderTemplates({ name, audience, size });
-  await logGeneration({ name, audience, size: audience === "internal" ? size : "", version: out.version });
+  // Runs after the response is sent, so a slow or failing Sheet never reaches the user.
+  after(() =>
+    logGeneration({
+      name,
+      audience,
+      size: audience === "internal" ? size : "",
+      version: out.version,
+      pinVersion: out.pinVersion,
+    }),
+  );
   return NextResponse.json(out, { headers: { "Cache-Control": "no-store" } });
 }

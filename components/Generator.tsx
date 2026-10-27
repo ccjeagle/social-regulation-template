@@ -6,7 +6,7 @@ import { parseMarkdown, toPlainText, type Block, type Run } from "@/lib/markdown
 
 type Audience = "internal" | "public";
 type Size = "small" | "large";
-type Result = { main: string; pin: string; name: string; version: string };
+type Result = { main: string; pin: string; name: string; version: string; pinVersion: string };
 
 const AUDIENCES: { value: Audience; label: string; hint: string }[] = [
   { value: "internal", label: "對教內同奮", hint: "內部社群，可稱「同奮」「師尊」" },
@@ -104,6 +104,7 @@ export function Generator({ accessKey }: { accessKey: string }) {
           <Panel
             id="print-area"
             title="交流規範全文"
+            subtitle={`版本 ${result.version}`}
             copyText={toPlainText(result.main)}
             actions={
               <>
@@ -115,12 +116,12 @@ export function Generator({ accessKey }: { accessKey: string }) {
             <Preview markdown={result.main} />
           </Panel>
 
-          <Panel title="置頂精簡版" subtitle="貼到 LINE 記事本或 Facebook 置頂貼文" copyText={toPlainText(result.pin)}>
+          <Panel title="置頂精簡版" subtitle={`版本 ${result.pinVersion}・貼到 LINE 記事本或社群置頂貼文`} copyText={toPlainText(result.pin)}>
             <Preview markdown={result.pin} />
           </Panel>
 
           <p className="text-center text-sm text-ink-soft">
-            內容僅在您的瀏覽器中轉成檔案，不會上傳或保存。「完整規範請見：〔連結〕」等〔　〕處，請貼上後自行補上。
+            內容僅在您的瀏覽器中轉成檔案，不會上傳或保存。
           </p>
         </section>
       )}

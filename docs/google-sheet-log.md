@@ -37,11 +37,11 @@ gcloud iam service-accounts keys create sheets-key.json \
 ## 3. 建立 Google Sheet
 
 1. 建立新的試算表，把第一個分頁命名為 `Log`（或用 `GOOGLE_SHEET_TAB` 指定其他名稱）。
-2. 第 1 列填標題：`時間 | 社群名稱 | 對象 | 用途 | 版本`
+2. 第 1 列填標題：`時間 | 社群名稱 | 對象 | 用途 | 規範版本 | 置頂版版本`
 3. 「共用」給 service account 的 email，權限選「編輯者」。
 4. 從網址複製試算表 ID：`https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit`
 
-欄位內容：時間為 ISO 格式（UTC）；對象為 `internal`／`public`；用途為 `small`／`large`（公開版留空）；版本為模板 frontmatter 的 `version`。
+欄位內容：時間為 ISO 格式（UTC）；對象為 `internal`／`public`；用途為 `small`／`large`（公開版留空）；版本為各模板檔 frontmatter 的 `version`（規範與置頂版各自獨立）。
 
 ## 4. Vercel 環境變數
 
@@ -61,4 +61,4 @@ Project → Settings → Environment Variables（Production 與 Preview 視需�
 
 用有效的 `?id=` 網址產生一次，確認 Sheet 多一列。若沒有：到 Vercel → Logs 搜尋 `[log]`；
 `env vars missing` 代表變數沒設好，`append failed` 後面會有 Google 回傳的原因（常見：Sheet 沒共用給 service account、分頁名稱不符）。
-紀錄失敗不會擋住使用者產生內容。
+紀錄在回應送出之後才執行，失敗不會影響使用者；每次產生也都會在 Vercel Logs 留下一行 `[generation]`（含社群名稱與選項），即使 Sheet 寫入失敗也有備查。
