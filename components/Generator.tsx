@@ -219,7 +219,7 @@ function BlockView({ b }: { b: Block }) {
     case "item":
       return <p className="pl-6 -indent-5"><span className="mr-1 text-jade">{b.n}.</span><Runs runs={b.runs} /></p>;
     case "quote":
-      return <p className="border-l-4 border-apricot pl-4 text-ink-soft"><Runs runs={b.runs} /></p>;
+      return <p className="rounded-2xl bg-apricot/25 px-4 py-3 text-ink"><Runs runs={b.runs} /></p>;
     default:
       return <p><Runs runs={b.runs} /></p>;
   }
