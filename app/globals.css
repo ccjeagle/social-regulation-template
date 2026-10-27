@@ -22,8 +22,8 @@
   --color-jade-wash: var(--jade-wash);
   --color-line: var(--line);
   --color-apricot: var(--apricot);
-  --font-sans: var(--font-sans-tc), system-ui, sans-serif;
-  --font-serif: var(--font-serif-tc), serif;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-serif: "Noto Serif TC", "PingFang TC", serif;
 }
 
 body {
