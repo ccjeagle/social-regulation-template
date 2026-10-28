@@ -291,7 +291,7 @@ function BlockView({ b }: { b: Block }) {
     case "bullet":
       return <p className="pl-6 -indent-4"><span className="mr-1.5 text-jade">•</span><Runs runs={b.runs} /></p>;
     default: {
-      // "-- 範本版本：x --" footer stamp: set apart from the content
+      // "-- 版本：x --" footer stamp: set apart from the content
       const stamp = /^-- .* --$/.test(b.runs.map((r) => r.text).join(""));
       return stamp
         ? <p className="mt-4 border-t border-line pt-3 text-right text-sm text-ink-soft"><Runs runs={b.runs} /></p>
