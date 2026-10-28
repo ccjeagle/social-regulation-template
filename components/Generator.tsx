@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import type { Versions } from "@/lib/templates";
 import { parseMarkdown, toPlainText, type Block, type Run } from "@/lib/markdown";
 
 type Audience = "internal" | "public";
@@ -8,8 +9,8 @@ type Size = "small" | "large";
 type Result = { main: string; pin: string; name: string; version: string; pinVersion: string };
 
 const AUDIENCES: { value: Audience; label: string; hint: string }[] = [
-  { value: "internal", label: "對教內同奮", hint: "內部社群，可稱「同奮」「師尊」" },
-  { value: "public", label: "公開", hint: "任何人都能瀏覽或留言" },
+  { value: "internal", label: "教內社群", hint: "內部社群，可稱「同奮」「師尊」" },
+  { value: "public", label: "公開社群", hint: "任何人都能瀏覽或留言" },
 ];
 const SIZES: { value: Size; label: string; hint: string }[] = [
   { value: "small", label: "小型・交流用", hint: "數十人，互相分享與提問" },
@@ -18,7 +19,7 @@ const SIZES: { value: Size; label: string; hint: string }[] = [
 
 const FAIL = "產生失敗，請稍後再試；若持續發生，請聯絡資訊委員會。";
 
-export function Generator({ accessKey }: { accessKey: string }) {
+export function Generator({ accessKey, versions }: { accessKey: string; versions: Versions }) {
   const [name, setName] = useState("");
   const [audience, setAudience] = useState<Audience>("internal");
   const [size, setSize] = useState<Size>("small");
@@ -66,7 +67,7 @@ export function Generator({ accessKey }: { accessKey: string }) {
       if (!res.ok) throw new Error(data.error ?? FAIL);
       setResult({ ...data, name: name.trim() });
       setResultKey(inputKey);
-      setStatus("已產生，結果在下方");
+      setStatus(`已為「${name.trim()}」產生，結果在下方`);
       const motion = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
       requestAnimationFrame(() => {
         resultRef.current?.focus({ preventScroll: true });
@@ -83,7 +84,7 @@ export function Generator({ accessKey }: { accessKey: string }) {
   return (
     <>
       <header className="mb-10 text-center">
-        <h1 className="font-serif text-3xl tracking-wide text-jade-deep sm:text-4xl">社群交流基本規範產生器</h1>
+        <h1 className="font-serif text-3xl tracking-wide text-balance text-jade-deep sm:text-4xl">社群交流基本規範產生器</h1>
         <p className="mx-auto mt-4 max-w-md text-ink-soft">
           填入社群名稱，選擇適用對象，即可取得
           <br />
@@ -106,12 +107,18 @@ export function Generator({ accessKey }: { accessKey: string }) {
             placeholder="例如：○○教院同奮交流群"
             aria-invalid={nameError ? true : undefined}
             aria-describedby={nameError ? "name-error" : undefined}
-            className={`w-full rounded-2xl border bg-white px-4 py-3 text-lg placeholder:text-ink-soft/60 focus:border-jade focus:outline-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-jade/20 ${nameError ? "border-red-700" : "border-line"}`}
+            className={`w-full rounded-2xl border bg-white px-4 py-3 text-lg placeholder:text-ink-soft focus:border-jade focus:outline-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-jade/20 ${nameError ? "border-red-700" : "border-line"}`}
           />
           {nameError && <p id="name-error" className="mt-2 text-sm text-red-800">{nameError}</p>}
         </div>
 
-        <Choice legend="適用對象" name="audience" value={audience} onChange={setAudience} options={AUDIENCES} />
+        <Choice
+          legend="適用對象"
+          name="audience"
+          value={audience}
+          onChange={setAudience}
+          options={AUDIENCES.map((o) => ({ ...o, meta: `版本 ${versions[o.value]}` }))}
+        />
 
         {audience === "internal" && (
           <Choice legend="社群的用途" name="size" value={size} onChange={setSize} options={SIZES} />
@@ -157,6 +164,7 @@ export function Generator({ accessKey }: { accessKey: string }) {
         <section ref={resultRef} tabIndex={-1} aria-label="產生結果" className="mt-14 scroll-mt-6 space-y-8 focus:outline-none">
           <Panel
             id="print-area"
+            delay={0}
             title="交流基本規範全文"
             subtitle={`版本 ${result.version}`}
             copyText={toPlainText(result.main)}
@@ -167,6 +175,7 @@ export function Generator({ accessKey }: { accessKey: string }) {
 
           <Panel
             tone="pin"
+            delay={120}
             title="置頂精簡版"
             subtitle={`版本 ${result.pinVersion}・複製後貼到 LINE 記事本或社群置頂貼文`}
             copyText={toPlainText(result.pin)}
@@ -184,7 +193,7 @@ function Choice<T extends string>({
   legend, name, value, onChange, options,
 }: {
   legend: string; name: string; value: T; onChange: (v: T) => void;
-  options: { value: T; label: string; hint: string }[];
+  options: { value: T; label: string; hint: string; meta?: string }[];
 }) {
   return (
     <fieldset>
@@ -196,7 +205,10 @@ function Choice<T extends string>({
             className="cursor-pointer rounded-2xl border border-line bg-white p-4 transition has-checked:border-jade has-checked:bg-jade-wash/70 has-checked:ring-1 has-checked:ring-jade has-focus-visible:ring-4 has-focus-visible:ring-jade/25"
           >
             <input type="radio" name={name} value={o.value} checked={value === o.value} onChange={() => onChange(o.value)} className="sr-only" />
-            <span className="block font-medium">{o.label}</span>
+            <span className="flex items-baseline gap-2">
+              <span className="font-medium">{o.label}</span>
+              {o.meta && <span className="text-xs tabular-nums text-ink-soft">{o.meta}</span>}
+            </span>
             <span className="block text-sm text-ink-soft">{o.hint}</span>
           </label>
         ))}
@@ -206,22 +218,23 @@ function Choice<T extends string>({
 }
 
 function Panel({
-  id, tone, title, subtitle, copyText, actions, children,
+  id, tone, delay, title, subtitle, copyText, actions, children,
 }: {
-  id?: string; tone?: "pin"; title: string; subtitle?: string; copyText: string; actions?: React.ReactNode; children: React.ReactNode;
+  id?: string; delay?: number; tone?: "pin"; title: string; subtitle?: string; copyText: string; actions?: React.ReactNode; children: React.ReactNode;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"ok" | "fail" | null>(null);
   async function copy() {
     try {
       await navigator.clipboard.writeText(copyText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      setCopied("ok");
     } catch {
-      /* clipboard blocked: leave button unchanged */
+      // clipboard blocked: say so, the text can still be selected by hand
+      setCopied("fail");
     }
+    setTimeout(() => setCopied(null), 2200);
   }
   return (
-    <article id={id} className={`rounded-3xl border p-6 shadow-[0_2px_6px_-2px_rgba(53,93,83,0.14)] sm:p-9 ${tone === "pin" ? "border-apricot bg-apricot/20" : "border-line bg-paper"}`}>
+    <article id={id} style={{ animationDelay: `${delay ?? 0}ms` }} className={`reveal rounded-3xl border p-6 shadow-[0_2px_6px_-2px_rgba(53,93,83,0.14)] sm:p-9 ${tone === "pin" ? "border-apricot bg-apricot/20" : "border-line bg-paper"}`}>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div>
           <h2 className="font-serif text-xl text-jade-deep">{title}</h2>
@@ -235,8 +248,8 @@ function Panel({
             aria-label={`複製${title}`}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-white px-4 text-sm transition hover:border-jade hover:bg-jade-wash/60"
           >
-            {copied ? <CheckIcon /> : <CopyIcon />}
-            <span aria-live="polite">{copied ? "已複製" : "複製"}</span>
+            {copied === "ok" ? <CheckIcon /> : <CopyIcon />}
+            <span aria-live="polite">{copied === "ok" ? "已複製，可以貼上了" : copied === "fail" ? "無法複製，請手動選取" : "複製"}</span>
           </button>
         </div>
       </div>

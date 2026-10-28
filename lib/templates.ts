@@ -46,6 +46,16 @@ function tidy(src: string): string {
     .trim() + "\n";
 }
 
+// Version of each audience's full text, shown on the form before anything is generated.
+export type Versions = Record<Audience, string>;
+
+export async function getVersions(): Promise<Versions> {
+  const read = async (a: Audience) =>
+    splitFrontmatter(await readFile(path.join(DIR, FILES[a].main), "utf8")).meta.version ?? "";
+  const [internal, pub] = await Promise.all([read("internal"), read("public")]);
+  return { internal, public: pub };
+}
+
 export async function renderTemplates(opts: {
   name: string;
   audience: Audience;

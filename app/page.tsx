@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Generator } from "@/components/Generator";
 import { isValidKey } from "@/lib/access";
+import { getVersions } from "@/lib/templates";
 
 async function Gate({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
   const { id } = await searchParams;
@@ -12,7 +13,7 @@ async function Gate({ searchParams }: { searchParams: PageProps<"/">["searchPara
       </h1>
     );
   }
-  return <Generator accessKey={key as string} />;
+  return <Generator accessKey={key as string} versions={await getVersions()} />;
 }
 
 export default function Page(props: PageProps<"/">) {
